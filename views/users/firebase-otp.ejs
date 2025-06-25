@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login with Phone OTP</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <h2>📱 Phone Number Login (Firebase OTP)</h2>
+
+  <input type="text" id="phone" placeholder="+91XXXXXXXXXX" />
+  <div id="recaptcha-container"></div>
+  <button onclick="sendOTP()">Send OTP</button>
+
+  <br><br>
+  <input type="text" id="otp" placeholder="Enter OTP">
+  <button onclick="verifyOTP()">Verify & Login</button>
+
+  <script>
+    // Your Firebase config
+    const firebaseConfig = {
+      apiKey: "AIzaSyDtdqEQ-6i36jN4wjskD9MGmKMNCaZa6Ms",
+      authDomain: "e--commerce-2df01.firebaseapp.com",
+      projectId: "e--commerce-2df01",
+      storageBucket: "e--commerce-2df01.appspot.com",
+      messagingSenderId: "52883930355",
+      appId: "1:52883930355:web:25f218ba07bccc7eadcb86",
+      measurementId: "G-078JPRSNZ3"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+      size: 'normal',
+      callback: function(response) {
+        // reCAPTCHA solved
+      }
+    });
+
+    function sendOTP() {
+      const phoneNumber = document.getElementById('phone').value;
+      const appVerifier = window.recaptchaVerifier;
+
+      firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+        .then((confirmationResult) => {
+          window.confirmationResult = confirmationResult;
+          alert("OTP sent!");
+        }).catch((error) => {
+          alert(error.message);
+        });
+    }
+
+    function verifyOTP() {
+      const otp = document.getElementById('otp').value;
+      window.confirmationResult.confirm(otp).then((result) => {
+        result.user.getIdToken().then((idToken) => {
+          // Send token to backend to validate and log in user
+          fetch("/firebase-login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ firebaseToken: idToken })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              alert("Login successful!");
+              window.location.href = "/dashboard"; // or wherever you want to go
+            } else {
+              alert("Login failed!");
+            }
+          });
+        });
+      }).catch((error) => {
+        alert("Invalid OTP");
+      });
+    }
+  </script>
+</body>
+</html>

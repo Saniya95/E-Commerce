@@ -1,0 +1,21 @@
+<% if (success && success.length > 0) { %>
+  <div class="bg-green-100 text-green-800 p-2 text-center mb-4 rounded-md">
+    <%= success %>
+  </div>
+<% } %>
+
+<% if (error && error.length > 0) { %>
+  <div class="bg-red-100 text-red-800 p-2 text-center mb-4 rounded-md">
+    <%= error %>
+  </div>
+<% } %>
+
+
+<script>
+  // Show loader when any form is submitted
+  document.querySelectorAll("form").forEach(form => {
+    form.addEventListener("submit", () => {
+      document.getElementById("loader").classList.remove("hidden");
+    });
+  });
+</script>

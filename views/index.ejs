@@ -1,0 +1,77 @@
+<%- include('partials/header', { title: "Home" }) %>
+<%- include('partials/Loader') %>
+
+<main class="flex-grow">
+  <div class="text-center mt-10">
+    <h1 class="text-3xl font-bold mb-6 text-center">🛍️ Our Products</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+      <% products.forEach(product => { %>
+        <%- include('partials/ProductCard', { product: product }) %>
+      <% }) %>
+    </div>
+  </div>
+</main>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const productId = button.getAttribute('data-id');
+      const qtyInput = document.querySelector(`.quantity-input[data-id="${productId}"]`);
+      const quantity = qtyInput ? qtyInput.value : 1;
+
+      if (!productId || !quantity) {
+        Toastify({
+          text: "❌ Product ID and quantity are required.",
+          duration: 3000,
+          close: true,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#ef4444"
+        }).showToast();
+        return;
+      }
+
+      try {
+        const res = await fetch('/cart', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId, quantity })
+        });
+
+        const result = await res.json();
+
+        if (res.ok) {
+          Toastify({
+            text: "✅ " + result.message,
+            duration: 3000,
+            gravity: "top",
+            position: "center",
+            backgroundColor: "#22c55e"
+          }).showToast();
+        } else {
+          Toastify({
+            text: "❌ " + result.message,
+            duration: 3000,
+            gravity: "top",
+            position: "center",
+            backgroundColor: "#ef4444"
+          }).showToast();
+        }
+      } catch (err) {
+        Toastify({
+          text: "❌ Error: " + err.message,
+          duration: 3000,
+          gravity: "top",
+          position: "center",
+          backgroundColor: "#ef4444"
+        }).showToast();
+      }
+    });
+  });
+});
+</script>
+
+
+
+<%- include('partials/footer') %>

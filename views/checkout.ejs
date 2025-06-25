@@ -1,0 +1,27 @@
+<%- include('partials/header', { title: "Bill Summary" }) %>
+<%- include('partials/Loader') %>
+
+
+<div class="max-w-2xl mx-auto mt-10 p-4 bg-white shadow rounded">
+  <h2 class="text-2xl font-bold mb-4">🧾 Bill Summary</h2>
+
+  <% cart.forEach(item => { %>
+    <div class="flex justify-between mb-2">
+      <div>
+        <p class="font-semibold"><%= item.product.name %></p>
+        <p class="text-sm text-gray-500">Qty: <%= item.quantity %></p>
+      </div>
+      <p>₹<%= item.product.price * item.quantity %></p>
+    </div>
+  <% }) %>
+
+  <hr class="my-3">
+
+  <p class="text-md">Subtotal: ₹<%= subtotal %></p>
+  <p class="text-md">Delivery Fee: ₹<%= delivery %></p>
+  <p class="text-lg font-bold mt-2">Total: ₹<%= total %></p>
+
+  <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Confirm Payment</button>
+</div>
+
+<%- include('partials/footer') %>
