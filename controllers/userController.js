@@ -1,6 +1,6 @@
 const { validationResult } = require('express-validator');
-const { success, error } = require('../utils/response');
 const userModel = require('../models/usermodel');
+const Product = require('../models/product'); // ✅ Corrected path and name
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const admin = require('../firebase/firebase-admin'); 
@@ -10,17 +10,15 @@ const admin = require('../firebase/firebase-admin');
 exports.signup = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    req.flash("error", "Validation failed");
-    return res.redirect("/users/signup");
+    return res.render("users/signup", { error: "Validation failed" });
   }
 
   try {
     const { fullname, email, contact, location, password } = req.body;
 
-    const existingUser = await userModel.findOne({ contact });
+    const existingUser = await userModel.findOne({ email });
     if (existingUser) {
-      req.flash("error", "Phone number already registered");
-      return res.redirect("/users/signup");
+      return res.render("users/signup", { error: "email is  already registered" });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -33,18 +31,15 @@ exports.signup = async (req, res) => {
       isVerified: true
     });
 
-    // ✅ Set JWT token after signup
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.cookie("token", token, { httpOnly: true });
 
     console.log("✅ Signup successful, redirecting to /");
-    req.flash("success", "User registered successfully.");
-    return res.redirect("/");
-    
+    return res.render("/index", { success: "User registered successfully." });
+
   } catch (err) {
     console.error(err);
-    req.flash("error", "Signup failed: " + err.message);
-    return res.redirect("/users/signup");
+    return res.render("users/signup", { error: "Signup failed: " + err.message });
   }
 };
 
@@ -52,33 +47,47 @@ exports.signup = async (req, res) => {
 exports.login = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    req.flash("error", "Validation failed");
-    return res.redirect("/users/login");
+    return res.render("users/login", { error: "Validation failed" });
   }
+
   try {
     const { email, password } = req.body;
     const user = await userModel.findOne({ email });
+
     if (!user) {
-      req.flash("error", "Invalid credentials");
-      return res.redirect("/users/login");
+      return res.render("users/login", { error: "Invalid credentials" });
     }
+
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
-      req.flash("error", "Incorrect password");
-      return res.redirect("/users/login");
+      return res.render("users/login", { error: "Incorrect password" });
     }
-    const token = jwt.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET, { expiresIn: "7d" });
+
+    const token = jwt.sign(
+      { id: user._id, isAdmin: user.isAdmin },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
     res.cookie("token", token, { httpOnly: true });
-    req.flash("success", "Login successful");
-    console.log("✅ Final redirect reached");
-    return res.redirect("/");
+
+    // ✅ Fetch products before rendering index
+    const products = await Product.find();
+
+    console.log("✅ Login successful. Rendering home page.");
+    return res.render("index", {
+      success: "Login successful",
+      products
+    });
 
   } catch (err) {
     console.error(err);
-    req.flash("error", "Login failed: " + err.message);
-    return res.redirect("/users/login");
+    return res.render("users/login", {
+      error: "Login failed: " + err.message
+    });
   }
 };
+
+
 
 // 🔐 Firebase OTP Login
 exports.firebaseLogin = async (req, res) => {
@@ -104,21 +113,34 @@ exports.forgotPassword = async (req, res) => {
   res.render('users/forgot-password');
 };
 
+// 🔐 Reset Password
 exports.resetPassword = async (req, res) => {
-  const { firebaseToken, newPassword } = req.body;
+  const { firebaseToken, newPassword, confirmPassword, email } = req.body;
+
   try {
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ success: false, message: "Passwords do not match" });
+    }
+
     const decodedToken = await admin.auth().verifyIdToken(firebaseToken);
     const phone = decodedToken.phone_number;
-    const user = await userModel.findOne({ contact: phone });
+
+    const user = await userModel.findOne({ contact: phone, email });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res.status(404).json({
+        success: false,
+        message: "No user found with this phone and email"
+      });
     }
+
     const hashed = await bcrypt.hash(newPassword, 10);
     user.password = hashed;
     await user.save();
-    return res.json({ success: true });
+
+    return res.json({ success: true, message: "Password reset successful" });
+
   } catch (err) {
     console.error(err);
-    return res.status(400).json({ success: false, message: "Reset failed" });
+    return res.status(400).json({ success: false, message: "Reset failed: " + err.message });
   }
 };

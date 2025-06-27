@@ -19,3 +19,34 @@
     });
   });
 </script>
+<!-- Toastify Script -->
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+
+<script>
+  <% if (success) { %>
+    Toastify({
+      text: "<%= success %>",
+      duration: 4000,
+      gravity: "top",
+      position: "right",
+      style: {
+        background: "#16a34a"
+      },
+      close: true
+    }).showToast();
+  <% } %>
+
+  <% if (error) { %>
+    Toastify({
+      text: "<%= error %>",
+      duration: 4000,
+      gravity: "top",
+      position: "right",
+      style: {
+        background: "#dc2626"
+      },
+      close: true
+    }).showToast();
+  <% } %>
+</script>

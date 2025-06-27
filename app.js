@@ -62,10 +62,10 @@ app.get('/', async (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-  res.render('signup');
+  res.render('users/signup');
 });
 app.get('/login', (req, res) => {
-  res.render('login');
+  res.render('users/login');
 });
 app.get('/cart', (req, res) => {
   res.render('cart');

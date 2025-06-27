@@ -1,77 +1,70 @@
 <%- include('partials/header', { title: "Home" }) %>
 <%- include('partials/Loader') %>
 
-<main class="flex-grow">
-  <div class="text-center mt-10">
-    <h1 class="text-3xl font-bold mb-6 text-center">🛍️ Our Products</h1>
+<main class="flex-grow bg-[#fdfaf6] text-gray-900">
+  <section class="text-center py-12">
+    <h1 class="text-4xl font-bold text-[#1e3a8a] mb-4">🛍️ Discover Premium Products</h1>
+    <p class="text-lg text-gray-600">Style, Quality & Elegance in Every Item</p>
+  </section>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-4">
+  <section class="max-w-7xl mx-auto px-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       <% products.forEach(product => { %>
         <%- include('partials/ProductCard', { product: product }) %>
       <% }) %>
     </div>
-  </div>
+  </section>
 </main>
+
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-    button.addEventListener('click', async () => {
-      const productId = button.getAttribute('data-id');
-      const qtyInput = document.querySelector(`.quantity-input[data-id="${productId}"]`);
-      const quantity = qtyInput ? qtyInput.value : 1;
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+      button.addEventListener('click', async () => {
+        const productId = button.getAttribute('data-id');
+        const qtyInput = document.querySelector(`.quantity-input[data-id="${productId}"]`);
+        const quantity = qtyInput ? qtyInput.value : 1;
 
-      if (!productId || !quantity) {
-        Toastify({
-          text: "❌ Product ID and quantity are required.",
-          duration: 3000,
-          close: true,
-          gravity: "top",
-          position: "center",
-          backgroundColor: "#ef4444"
-        }).showToast();
-        return;
-      }
-
-      try {
-        const res = await fetch('/cart', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ productId, quantity })
-        });
-
-        const result = await res.json();
-
-        if (res.ok) {
+        if (!productId || !quantity) {
           Toastify({
-            text: "✅ " + result.message,
+            text: "❌ Product ID and quantity are required.",
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "center",
+            backgroundColor: "#ef4444"
+          }).showToast();
+          return;
+        }
+
+        try {
+          const res = await fetch('/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ productId, quantity })
+          });
+
+          const result = await res.json();
+
+          Toastify({
+            text: (res.ok ? "✅ " : "❌ ") + result.message,
             duration: 3000,
             gravity: "top",
             position: "center",
-            backgroundColor: "#22c55e"
+            backgroundColor: res.ok ? "#22c55e" : "#ef4444"
           }).showToast();
-        } else {
+
+        } catch (err) {
           Toastify({
-            text: "❌ " + result.message,
+            text: "❌ Error: " + err.message,
             duration: 3000,
             gravity: "top",
             position: "center",
             backgroundColor: "#ef4444"
           }).showToast();
         }
-      } catch (err) {
-        Toastify({
-          text: "❌ Error: " + err.message,
-          duration: 3000,
-          gravity: "top",
-          position: "center",
-          backgroundColor: "#ef4444"
-        }).showToast();
-      }
+      });
     });
   });
-});
 </script>
-
-
 
 <%- include('partials/footer') %>

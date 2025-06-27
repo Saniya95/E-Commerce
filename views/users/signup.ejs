@@ -1,28 +1,29 @@
-<!-- SIGNUP PAGE with OTP Verification + Location -->
-<%- include('partials/header', { title: "Signup" }) %>
+<%- include('../partials/header', { title: "Signup" }) %>
 <main class="min-h-screen flex justify-center items-center bg-gray-100 dark:bg-gray-900">
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md w-full max-w-2xl p-8">
     <h2 class="text-2xl font-bold text-center mb-6 text-black dark:text-white">Create Account</h2>
 
-    <!-- ✅ STEP 1: OTP VERIFICATION -->
+    <!-- ✅ STEP 1: PHONE + OTP SECTION -->
     <div id="step1">
-      <p class="text-center text-lg font-semibold mb-4 text-green-700">📱 First, verify your phone number</p>
-      <input id="phone" type="text" placeholder="Enter Phone (+91...)" class="w-full px-4 py-2 mb-4 border rounded-md text-black">
+      <input id="phone" type="text" placeholder="Enter Phone (+91...)" class="w-full px-4 py-2 mb-2 border rounded-md text-black">
       <div id="recaptcha-container"></div>
       <button type="button" onclick="sendOTP()" class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">Send OTP</button>
-      <input id="otp" type="text" placeholder="Enter OTP" class="w-full px-4 py-2 mt-4 border rounded-md text-black">
-      <button type="button" onclick="verifyOTP()" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 mt-2">Verify OTP</button>
+
+      <div id="otpSection" class="hidden mt-4">
+        <input id="otp" type="text" placeholder="Enter OTP" class="w-full px-4 py-2 border rounded-md text-black">
+        <button type="button" onclick="verifyOTP()" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 mt-2">Verify OTP</button>
+      </div>
     </div>
 
-    <!-- ✅ STEP 2: SHOW AFTER OTP SUCCESS -->
+    <!-- ✅ STEP 2: FORM AFTER VERIFICATION -->
     <form id="step2" action="/users/signup" method="POST" class="space-y-4 hidden mt-6">
-      <input name="fullname" type="text" placeholder="Full Name" class="w-full px-4 py-2 border rounded-md dark:bg-gray-700 text-black">
-      <input name="email" type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-md dark:bg-gray-700 text-black">
-      <input name="contact" type="text" placeholder="Phone Number" readonly class="w-full px-4 py-2 border rounded-md dark:bg-gray-700 text-black">
-      <input name="password" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded-md dark:bg-gray-700 text-black">
+      <input name="fullname" type="text" placeholder="Full Name" class="w-full px-4 py-2 border rounded-md text-black">
+      <input name="email" type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-md text-black">
+      <input name="contact" type="text" readonly class="w-full px-4 py-2 border rounded-md text-black">
+      <input name="password" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded-md text-black">
+      <input name="confirmPassword" type="password" placeholder="Confirm Password" class="w-full px-4 py-2 border rounded-md text-black">
 
-      <!-- 📍 Location input auto-filled -->
-      <input name="location" id="location" type="text" placeholder="Fetching Location..." class="w-full px-4 py-2 border rounded-md dark:bg-gray-700 text-black" readonly>
+      <input name="location" id="location" type="text" placeholder="Fetching Location..." class="w-full px-4 py-2 border rounded-md text-black" readonly>
       <button type="button" onclick="getLocation()" class="text-sm text-blue-500 underline">📍 Refresh Location</button>
 
       <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Signup</button>
@@ -30,7 +31,6 @@
   </div>
 </main>
 
-<!-- Firebase + OTP + Geolocation Script -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script>
@@ -46,16 +46,18 @@
   firebase.initializeApp(firebaseConfig);
 
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
-    size: 'normal', callback: () => {}
+    size: 'normal',
+    callback: () => {}
   });
 
   function sendOTP() {
     const phone = document.getElementById("phone").value;
     const appVerifier = window.recaptchaVerifier;
     firebase.auth().signInWithPhoneNumber(phone, appVerifier)
-      .then(confirmationResult => {
-        window.confirmationResult = confirmationResult;
-        alert("OTP sent to " + phone);
+      .then(result => {
+        window.confirmationResult = result;
+        document.getElementById("otpSection").classList.remove("hidden");
+        alert("OTP sent!");
       })
       .catch(error => alert(error.message));
   }
@@ -75,22 +77,18 @@
       navigator.geolocation.getCurrentPosition(async function(position) {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-
         try {
           const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
           const data = await res.json();
-          const address = data.display_name;
-          document.getElementById("location").value = address;
-        } catch (err) {
+          document.getElementById("location").value = data.display_name;
+        } catch {
           document.getElementById("location").value = "Could not fetch address.";
         }
-      }, function(err) {
-        alert("Location access denied.");
       });
     } else {
-      alert("Geolocation is not supported by this browser.");
+      alert("Geolocation not supported");
     }
   }
 </script>
+<%- include('../partials/footer') %>
 
-<%- include('partials/footer') %>
