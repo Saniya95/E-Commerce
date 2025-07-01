@@ -1,0 +1,39 @@
+<%- include('../partials/header', { title: "Profile" }) %>
+<main>
+  <div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
+  <h2 class="text-2xl font-bold mb-4">👤 Your Profile</h2>
+
+  <div class="mb-4">
+    <img src="<%= user.profilepic ? '/uploads/' + user.profilepic : '/images/default-user.png' %>" 
+     alt="Profile Picture"
+     class="w-32 h-32 rounded-full object-cover">
+  </div>
+
+  <p class="mb-2"><strong>Name:</strong> <%= user.fullname %></p>
+  <p class="mb-2"><strong>Email:</strong> <%= user.email %></p>
+  <p class="mb-2"><strong>Contact:</strong> <%= user.contact %></p>
+
+  <a href="/users/edit-profile" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Edit Profile</a>
+</div>
+
+<!-- 🛒 Orders Section -->
+<div class="max-w-xl mx-auto mt-8 p-6 bg-white rounded shadow">
+  <h3 class="text-xl font-semibold mb-4">🛒 Your Orders</h3>
+
+  <% if (orders.length > 0) { %>
+    <ul class="space-y-4">
+      <% orders.forEach(order => { %>
+        <li class="border p-4 rounded bg-gray-100">
+          <p><strong>Order ID:</strong> <%= order._id %></p>
+          <p><strong>Total:</strong> ₹<%= order.total %></p>
+          <p><strong>Status:</strong> <%= order.status || 'Pending' %></p>
+        </li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p class="text-gray-500 italic">No orders found.</p>
+  <% } %>
+</div>
+
+</main>
+<%- include('../partials/footer') %>

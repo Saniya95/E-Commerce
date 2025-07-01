@@ -1,14 +1,16 @@
 const { validationResult } = require('express-validator');
 const userModel = require('../models/usermodel');
-const Product = require('../models/product'); // ✅ Corrected path and name
+const Product = require('../models/product');
+const orderModel = require('../models/ordermodel'); 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const admin = require('../firebase/firebase-admin'); 
-
+const admin = require('../firebase/firebase-admin');
+const path = require('path');
+const fs = require('fs');
 
 // 🔐 SIGNUP
 exports.signup = async (req, res) => {
-  const errors = validationResult(req);
+    errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.render("users/signup", { error: "Validation failed" });
   }
@@ -18,7 +20,7 @@ exports.signup = async (req, res) => {
 
     const existingUser = await userModel.findOne({ email });
     if (existingUser) {
-      return res.render("users/signup", { error: "email is  already registered" });
+      return res.render("users/signup", { error: "Email is already registered" });
     }
 
     const hashed = await bcrypt.hash(password, 10);
@@ -34,8 +36,8 @@ exports.signup = async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
     res.cookie("token", token, { httpOnly: true });
 
-    console.log("✅ Signup successful, redirecting to /");
-    return res.render("/index", { success: "User registered successfully." });
+    const products = await Product.find();
+    return res.render("index", { products, success: "User registered successfully." });
 
   } catch (err) {
     console.error(err);
@@ -70,14 +72,8 @@ exports.login = async (req, res) => {
     );
     res.cookie("token", token, { httpOnly: true });
 
-    // ✅ Fetch products before rendering index
-    const products = await Product.find();
-
-    console.log("✅ Login successful. Rendering home page.");
-    return res.render("index", {
-      success: "Login successful",
-      products
-    });
+    req.flash("success", "Login successful");
+    return res.redirect("/"); // ✅ Redirect instead of rendering directly
 
   } catch (err) {
     console.error(err);
@@ -86,8 +82,6 @@ exports.login = async (req, res) => {
     });
   }
 };
-
-
 
 // 🔐 Firebase OTP Login
 exports.firebaseLogin = async (req, res) => {
@@ -142,5 +136,67 @@ exports.resetPassword = async (req, res) => {
   } catch (err) {
     console.error(err);
     return res.status(400).json({ success: false, message: "Reset failed: " + err.message });
+  }
+};
+
+
+// 🔐 Profile Page
+exports.profilePage = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id);
+    const orders = await orderModel.find({ userId: user._id });
+
+    res.render("users/profile", { user, orders });
+  } catch (err) {
+    console.error("❌ Error loading profile:", err);
+    res.status(500).send("Failed to load profile.");
+  }
+};
+
+
+// 🔓 LOGOUT
+  exports.logout = (req, res) => {
+  res.clearCookie('token'); // remove JWT token cookie
+  req.flash('success', 'You have been logged out.');
+  res.redirect('/login');
+};
+
+exports.getEditProfile = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id);
+    res.render('users/edit-profile', { user });
+  } catch (err) {
+    console.error("❌ Error loading edit profile page:", err);
+    res.redirect('/users/profile');
+  }
+};
+
+// Handle Profile Update
+exports.updateProfile = async (req, res) => {
+  try {
+    const user = await userModel.findById(req.user.id);
+    const { fullname, contact, location } = req.body;
+
+    // Check for new image
+    if (req.file) {
+      // Optional: Delete old image
+      if (user.profilepic && user.profilepic !== 'default-user.png') {
+        const oldPath = path.join(__dirname, '../public/uploads', user.profilepic);
+        if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+      }
+      user.profilepic = req.file.filename;
+    }
+
+    user.fullname = fullname;
+    user.contact = contact;
+    user.location = location;
+
+    await user.save();
+    req.flash('success', 'Profile updated successfully.');
+    res.redirect('/users/profile');
+  } catch (err) {
+    console.error("❌ Error updating profile:", err);
+    req.flash('error', 'Failed to update profile.');
+    res.redirect('/users/edit-profile');
   }
 };

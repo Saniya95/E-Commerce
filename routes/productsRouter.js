@@ -1,20 +1,25 @@
 const express = require('express');
 const router = express.Router();
+
+const upload = require('../utils/multer');
 const { createProduct, getProducts } = require('../controllers/productController');
 const { verifyUser, verifyAdmin } = require('../middlewares/auth');
-const Product = require('../models/product');
+const Category = require('../models/category');
 
-router.post('/', async (req, res) => {
+// 🛍️ Show All Products on Home or Product Page
+router.get('/', getProducts);
+
+// ➕ Add Product Form Page (GET)
+router.get('/add', verifyAdmin, async (req, res) => {
   try {
-    const product = await Product.create(req.body);
-    res.status(201).json(product);
+    const categories = await Category.find();
+    res.render('products/add', { categories }); // ✅ Ensure you have views/products/add.ejs
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(500).render('error', { message: 'Error loading form' });
   }
 });
-router.get('/', async (req, res) => {
-  const products = await Product.find();
-  res.render('index', { products }); // sending products to EJS
-});
+
+// ➕ Handle Product Submission (POST)
+router.post('/add', verifyAdmin, upload.single('image'), createProduct);
 
 module.exports = router;

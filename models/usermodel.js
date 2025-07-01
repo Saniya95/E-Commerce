@@ -25,6 +25,9 @@ cart: [
     quantity: { type: Number, default: 1 }
   }
 ],
+
+  profilepic: { type: String }
+
 });
 
 

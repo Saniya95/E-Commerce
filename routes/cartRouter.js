@@ -32,10 +32,9 @@ router.post('/cart', verifyUser, addToCartValidator, async (req, res) => {
 router.get('/cart', verifyUser, getCart);
 
 // POST /cart/remove - Remove from cart
-router.post('/cart/remove', verifyUser, removeFromCart);
+router.post('/cart/remove/:productId', verifyUser, removeFromCart);
 
-
-router.post('/cart/update', verifyUser,updateCartQuantity );
-
+// ✅ This allows updating a specific product:
+router.post('/cart/update/:productId', verifyUser, updateCartQuantity);
 
 module.exports = router;

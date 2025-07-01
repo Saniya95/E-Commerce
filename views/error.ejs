@@ -1,0 +1,9 @@
+<%- include('partials/header', { title: "Error" }) %>
+
+<div class="max-w-xl mx-auto text-center py-16">
+  <h1 class="text-3xl font-bold text-red-600 mb-4">❌ Oops! Something went wrong</h1>
+  <p class="text-lg text-gray-700"><%= message %></p>
+  <a href="/" class="mt-6 inline-block text-blue-600 hover:underline">← Back to Home</a>
+</div>
+
+<%- include('partials/footer') %>

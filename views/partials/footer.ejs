@@ -1,7 +1,65 @@
-</main> <!-- Closes the main from header -->
-
-<footer class="mt-auto bg-gray-800 text-white p-4 text-center">
-  <p>&copy; 2025 Scratch Store. All rights reserved.</p>
+<footer class="bg-gray-900 text-white py-6 mt-12">
+  <div class="max-w-6xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+    <p>&copy; <%= new Date().getFullYear() %> Scratch. All rights reserved.</p>
+    <div class="flex space-x-4 mt-2 md:mt-0">
+      <a href="/about" class="hover:text-gray-400">About</a>
+      <a href="/contact" class="hover:text-gray-400">Contact</a>
+      <a href="/privacy" class="hover:text-gray-400">Privacy</a>
+    </div>
+  </div>
 </footer>
-</body>
-</html>
+
+<!-- ✅ AOS Animation -->
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>AOS.init();</script>
+
+<!-- ✅ Toastify -->
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+<!-- ✅ Swiper -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+  new Swiper(".mySwiper", {
+    loop: true,
+    autoplay: { delay: 3000 },
+    pagination: { el: ".swiper-pagination" }
+  });
+</script>
+
+<!-- ✅ Dropdown + Toast for Guests -->
+<script>
+  const button = document.getElementById("menuButton");
+  const dropdown = document.getElementById("menuDropdown");
+
+  if (button && dropdown) {
+    button.addEventListener("click", () => {
+      dropdown.classList.toggle("hidden");
+    });
+  }
+
+  const blocked = document.getElementById("profileBlocked");
+  if (blocked) {
+    blocked.addEventListener("click", () => {
+      Toastify({
+        text: "⚠️ Login required to view profile",
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#ef4444"
+      }).showToast();
+    });
+  }
+
+  const cart = document.getElementById("cartToast");
+  if (cart) {
+    cart.addEventListener("click", () => {
+      Toastify({
+        text: "⚠️ Please login to view your cart",
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#f97316"
+      }).showToast();
+    });
+  }
+</script>

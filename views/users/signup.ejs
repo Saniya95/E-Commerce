@@ -1,32 +1,39 @@
 <%- include('../partials/header', { title: "Signup" }) %>
+
 <main class="min-h-screen flex justify-center items-center bg-gray-100 dark:bg-gray-900">
   <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md w-full max-w-2xl p-8">
     <h2 class="text-2xl font-bold text-center mb-6 text-black dark:text-white">Create Account</h2>
 
-    <!-- ✅ STEP 1: PHONE + OTP SECTION -->
-    <div id="step1">
-      <input id="phone" type="text" placeholder="Enter Phone (+91...)" class="w-full px-4 py-2 mb-2 border rounded-md text-black">
-      <div id="recaptcha-container"></div>
-      <button type="button" onclick="sendOTP()" class="w-full bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600">Send OTP</button>
+    <form id="signupForm" action="/users/signup" method="POST" class="space-y-4">
+      <input name="fullname" type="text" placeholder="Full Name" class="w-full px-4 py-2 border rounded-md text-black" disabled>
+      <input name="email" type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-md text-black" disabled>
 
-      <div id="otpSection" class="hidden mt-4">
-        <input id="otp" type="text" placeholder="Enter OTP" class="w-full px-4 py-2 border rounded-md text-black">
-        <button type="button" onclick="verifyOTP()" class="w-full bg-purple-500 text-white py-2 rounded hover:bg-purple-600 mt-2">Verify OTP</button>
+      <!-- 📞 Phone and OTP Section Side by Side -->
+      <div class="flex items-center gap-2">
+      <input id="phone" type="text" placeholder="Phone (+91...)" class="flex-1 px-4 py-2 border rounded-md text-black">
+      <button type="button" onclick="sendOTP()" class="bg-yellow-500 text-white px-4 rounded hover:bg-yellow-600">Send OTP</button>
+   <span id="verifiedBadge" class="hidden text-green-600 font-medium text-sm flex items-center gap-1">
+    ✅ Verified
+  </span>
+</div>
+
+      <div id="recaptcha-container" class="mt-2 mb-2"></div>
+
+      <div id="otpSection" class="hidden flex gap-2 mt-2">
+        <input id="otp" type="text" placeholder="Enter OTP" class="flex-1 px-4 py-2 border rounded-md text-black">
+        <button type="button" onclick="verifyOTP()" class="bg-purple-500 text-white px-4 rounded hover:bg-purple-600">Verify OTP</button>
       </div>
-    </div>
 
-    <!-- ✅ STEP 2: FORM AFTER VERIFICATION -->
-    <form id="step2" action="/users/signup" method="POST" class="space-y-4 hidden mt-6">
-      <input name="fullname" type="text" placeholder="Full Name" class="w-full px-4 py-2 border rounded-md text-black">
-      <input name="email" type="email" placeholder="Email" class="w-full px-4 py-2 border rounded-md text-black">
-      <input name="contact" type="text" readonly class="w-full px-4 py-2 border rounded-md text-black">
-      <input name="password" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded-md text-black">
-      <input name="confirmPassword" type="password" placeholder="Confirm Password" class="w-full px-4 py-2 border rounded-md text-black">
+      <!-- Hidden Contact Field -->
+      <input name="contact" type="text" class="hidden">
 
-      <input name="location" id="location" type="text" placeholder="Fetching Location..." class="w-full px-4 py-2 border rounded-md text-black" readonly>
-      <button type="button" onclick="getLocation()" class="text-sm text-blue-500 underline">📍 Refresh Location</button>
+      <input name="password" type="password" placeholder="Password" class="w-full px-4 py-2 border rounded-md text-black" disabled>
+      <input name="confirmPassword" type="password" placeholder="Confirm Password" class="w-full px-4 py-2 border rounded-md text-black" disabled>
 
-      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700">Signup</button>
+      <input name="location" id="location" type="text" placeholder="Fetching Location..." class="w-full px-4 py-2 border rounded-md text-black" readonly disabled>
+      <button id="refreshLocation" type="button" onclick="getLocation()" class="text-sm text-blue-500 underline" disabled>📍 Refresh Location</button>
+
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700" disabled>Signup</button>
     </form>
   </div>
 </main>
@@ -40,36 +47,69 @@
     projectId: "e--commerce-2df01",
     storageBucket: "e--commerce-2df01.appspot.com",
     messagingSenderId: "52883930355",
-    appId: "1:52883930355:web:25f218ba07bccc7eadcb86",
-    measurementId: "G-078JPRSNZ3"
+    appId: "1:52883930355:web:25f218ba07bccc7eadcb86"
   };
   firebase.initializeApp(firebaseConfig);
 
   window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
     size: 'normal',
-    callback: () => {}
+    callback: function(response) {
+      console.log("reCAPTCHA verified");
+    }
   });
 
-  function sendOTP() {
-    const phone = document.getElementById("phone").value;
-    const appVerifier = window.recaptchaVerifier;
-    firebase.auth().signInWithPhoneNumber(phone, appVerifier)
-      .then(result => {
-        window.confirmationResult = result;
-        document.getElementById("otpSection").classList.remove("hidden");
-        alert("OTP sent!");
-      })
-      .catch(error => alert(error.message));
-  }
+function sendOTP() {
+  const phone = document.getElementById("phone").value;
+  firebase.auth().signInWithPhoneNumber(phone, window.recaptchaVerifier)
+    .then(result => {
+      window.confirmationResult = result;
+      document.getElementById("otpSection").classList.remove("hidden");
+      Toastify({
+        text: "OTP sent!",
+        duration: 3000,
+        backgroundColor: "#22c55e"
+      }).showToast();
+    })
+    .catch(error => {
+      Toastify({
+        text: "Error: " + error.message,
+        duration: 3000,
+        backgroundColor: "#ef4444"
+      }).showToast();
+    });
+}
 
-  function verifyOTP() {
-    const otp = document.getElementById("otp").value;
-    confirmationResult.confirm(otp).then(result => {
-      document.getElementById("step1").classList.add("hidden");
-      document.getElementById("step2").classList.remove("hidden");
-      document.querySelector("input[name='contact']").value = document.getElementById("phone").value;
-      getLocation();
-    }).catch(() => alert("Invalid OTP"));
+function verifyOTP() {
+  const otp = document.getElementById("otp").value;
+  confirmationResult.confirm(otp).then(result => {
+    Toastify({
+      text: "✅ Number has been verified!",
+      duration: 3000,
+      backgroundColor: "#22c55e"
+    }).showToast();
+
+    enableAllInputs();
+    document.querySelector("input[name='contact']").value = document.getElementById("phone").value;
+    getLocation();
+
+    // ✅ Hide OTP input and Captcha
+    document.getElementById("otpSection").classList.add("hidden");
+    document.getElementById("recaptcha-container").classList.add("hidden");
+  }).catch(() => {
+    Toastify({
+      text: "Invalid OTP",
+      duration: 3000,
+      backgroundColor: "#ef4444"
+    }).showToast();
+  });
+}
+
+
+  function enableAllInputs() {
+    const form = document.getElementById('signupForm');
+    form.querySelectorAll('input, button[type="submit"], #refreshLocation').forEach(el => {
+      if (!el.classList.contains("hidden")) el.removeAttribute("disabled");
+    });
   }
 
   function getLocation() {
@@ -85,10 +125,12 @@
           document.getElementById("location").value = "Could not fetch address.";
         }
       });
-    } else {
-      alert("Geolocation not supported");
     }
   }
 </script>
-<%- include('../partials/footer') %>
 
+<!-- ✅ Toastify -->
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+<%- include('../partials/footer') %>

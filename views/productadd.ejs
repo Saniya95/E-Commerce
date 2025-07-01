@@ -1,0 +1,68 @@
+<%- include('../partials/header', { title: "Add Product" }) %>
+
+<div class="max-w-2xl mx-auto mt-10 bg-white p-6 rounded shadow">
+  <h2 class="text-2xl font-bold mb-6 text-[#1e3a8a]">➕ Add New Product</h2>
+
+  <form action="/products/add" method="POST" enctype="multipart/form-data" class="space-y-4">
+    <!-- ✅ Product Name -->
+    <input 
+      type="text" 
+      name="name" 
+      placeholder="Product Name" 
+      class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" 
+      required 
+    />
+
+    <!-- ✅ Price -->
+    <input 
+      type="number" 
+      name="price" 
+      placeholder="Price (₹)" 
+      class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" 
+      required 
+    />
+
+    <!-- ✅ Discount -->
+    <input 
+      type="number" 
+      name="discount" 
+      placeholder="Discount (%)" 
+      class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400" 
+    />
+
+    <!-- ✅ Description -->
+    <textarea 
+      name="description" 
+      placeholder="Product Description" 
+      class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+      rows="3"
+    ></textarea>
+
+    <!-- ✅ Category Dropdown -->
+    <label class="block font-medium">Category:</label>
+        <select name="categorySlug" required>
+        <% categories.forEach(cat => { %>
+          <option value="<%= cat.slug %>"><%= cat.name %></option>
+        <% }) %>
+       </select>
+
+    <!-- ✅ Image Upload -->
+    <label class="block font-medium">Upload Image:</label>
+    <input 
+      type="file" 
+      name="image" 
+      accept="image/*" 
+      class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+    />
+
+    <!-- ✅ Submit Button -->
+    <button 
+      type="submit" 
+      class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded transition duration-300"
+    >
+      Add Product
+    </button>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>

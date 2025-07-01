@@ -1,10 +1,14 @@
-const mongoose = require('mongoose');
-const config = require("config");
+const mongoose = require("mongoose");
+require("dotenv").config(); // Load env variables
 
-const dbgr = require("debug")("development:mongoose");
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected successfully");
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err.message);
+    process.exit(1); // Exit on failure
+  }
+};
 
-mongoose.connect("mongodb://localhost:27017/E-Commerce", {
-  // remove deprecated options if using MongoDB 4+
-});
-
-module.exports = mongoose.connection;
+module.exports = connectDB;

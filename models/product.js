@@ -1,34 +1,21 @@
 const mongoose = require('mongoose');
 
 const productSchema = mongoose.Schema({
-  name: { type: String, 
-  required: true },
-
+  name: { type: String, required: true },
   image: String,
+  price: { type: Number, required: true },
+  discount: { type: Number, default: 0 },
+  description: { type: String, default: "No description provided." },
 
-  price: { type: Number, 
-  required: true },
-
-  discount: { type: Number,
-  default: 0 },
-
-  description: { type: String, 
-  default: "No description provided." },
-
-  category: { type: String,
-  default: "Luxury Bag" },
+  // ✅ Category reference
+  category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
 
   bgcolour: String,
-
   panelcolour: String,
-
   textcolour: String,
-  
-  gallery: [String],// Array of image URLs (can be Cloudinary or local)
+  gallery: [String],
 
-
-  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Add this
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
 });
-
 
 module.exports = mongoose.model("product", productSchema);

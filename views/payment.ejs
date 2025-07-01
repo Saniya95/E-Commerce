@@ -1,38 +1,16 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { title: "Payment Method" }) %>
 <%- include('partials/Loader') %>
-
 
 <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow mt-10">
   <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">💳 Choose Payment Method</h2>
 
   <form action="/payment/confirm" method="POST" class="space-y-4">
-    <div>
+    <% ["cod", "gpay", "phonepe", "slice"].forEach(method => { %>
       <label class="flex items-center space-x-3">
-        <input type="radio" name="method" value="cod" required>
-        <span>Cash on Delivery</span>
+        <input type="radio" name="method" value="<%= method %>" required>
+        <span><%= method.toUpperCase() %></span>
       </label>
-    </div>
-
-    <div>
-      <label class="flex items-center space-x-3">
-        <input type="radio" name="method" value="gpay">
-        <span>Google Pay</span>
-      </label>
-    </div>
-
-    <div>
-      <label class="flex items-center space-x-3">
-        <input type="radio" name="method" value="phonepe">
-        <span>PhonePe</span>
-      </label>
-    </div>
-
-    <div>
-      <label class="flex items-center space-x-3">
-        <input type="radio" name="method" value="slice">
-        <span>Slice</span>
-      </label>
-    </div>
+    <% }) %>
 
     <div class="mt-6 text-center">
       <button type="submit" class="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
