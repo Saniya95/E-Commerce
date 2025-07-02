@@ -17,11 +17,10 @@ const Product = require('./models/product');
 const category = require('./models/category');
 
 // View engine
-
-
 app.set("view engine", "ejs");
-app.set('views', 'views');
-app.set("layout", "partials/layout");
+app.use(expressLayouts);
+app.set('layout', 'layout'); // this refers to layout.ejs
+
 
 // ✅ Middleware — Order Matters!
 app.use(express.json());
@@ -29,7 +28,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use('/uploads', express.static('uploads'));
 app.use(cookieParser()); // ✅ Must be above any route that accesses cookies
-app.use(expressLayouts);
 
 app.use(session({
   secret: 'your_secret_key',
@@ -113,6 +111,10 @@ app.get('/categories', async (req, res) => {
     console.error("❌ Failed to load categories:", err);
     res.render('categories', { categories: [], user: null });
   }
+});
+
+app.get('/testplain', (req, res) => {
+  res.send('Plain text test');
 });
 
 // ✅ Start Server
