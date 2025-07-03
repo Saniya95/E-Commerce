@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title><%= typeof title !== 'undefined' ? title : 'Scratch' %></title>
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    main { flex: 1 0 auto; }
+    footer { flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <%- include('partials/header', { title: typeof title !== 'undefined' ? title : 'Scratch', user: user }) %>
+  <main>
+    <%- body %>
+  </main>
+  <%- include('partials/footer') %>
+</body>
+</html>
+
+
+
+<script>
+  <% if (typeof flash !== 'undefined' && flash.success) { %>
+    Toastify({ text: "<%= flash.success %>", style: { background: "green" } }).showToast();
+  <% } %>
+</script>

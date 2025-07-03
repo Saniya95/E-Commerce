@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Category = require('../models/category');
 const Product = require('../models/product');
+const categoryController = require("../controllers/categoryController");
+
+router.get("/:slug", categoryController.categoryPage);
 
 // ✅ Show your hardcoded category page
 router.get('/', (req, res) => {

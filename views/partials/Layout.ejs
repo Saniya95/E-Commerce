@@ -1,31 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= title || "Scratch" %></title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/css/toastify.css" />
-  </head>
-
-  <body class="bg-gray-100 text-gray-900">
-    <%- include("partials/header") %>
-    <%- include("partials/loader") %>
-
-    <main class="min-h-[calc(100vh-80px)]">
-      <%- body %>
-    </main>
-
-    <%- include("partials/footer") %>
-    <script src="/js/toastify.js"></script>
-    <script>
-      // Optional: show toast messages if flash message is passed
-      <% if (typeof flash !== 'undefined' && flash.success) { %>
-        Toastify({ text: "<%= flash.success %>", style: { background: "green" } }).showToast();
-      <% } %>
-      <% if (typeof flash !== 'undefined' && flash.error) { %>
-        Toastify({ text: "<%= flash.error %>", style: { background: "red" } }).showToast();
-      <% } %>
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <title><%= title || "Scratch" %></title>
+</head>
+<body>
+  <%- include('header', { title: title, user: user }) %>
+  <%- body %>
+  <%- include('footer') %>
+</body>
 </html>

@@ -8,6 +8,7 @@ const session = require('express-session');
 const flash = require('connect-flash');
 const expressLayouts = require("express-ejs-layouts");
 
+
 // Connect DB
 const connectDB = require("./config/mongoose");
 connectDB();
@@ -68,6 +69,8 @@ const usersRouter = require('./routes/usersRouter');
 const cartRouter = require('./routes/cartRouter');
 const paymentRouter = require('./routes/paymentRouter');
 const categoryRouter = require('./routes/categoryRouter');
+const adminRouter = require("./routes/adminRouter");
+const staticRouter = require('./routes/staticRouter')
 
 
 app.use('/categories', categoryRouter);
@@ -76,27 +79,27 @@ app.use("/products", productsRouter);
 app.use("/users", usersRouter);
 app.use(cartRouter);
 app.use('/', paymentRouter);
-
-
+app.use("/admin", adminRouter);
+app.use('/', staticRouter);
 
 // ✅ Pages
 app.get('/', async (req, res) => {
   try {
     const products = await Product.find();
-    res.render('index', { products }); // ✅ Only render here
+    res.render('index', { products, title: 'Home' });
   } catch (err) {
     console.error("❌ Failed to load products:", err);
-    res.render('index', { products: [] });
+    res.render('index', { products: [], title: 'Home' });
   }
 });
 
-app.get('/signup', (req, res) => res.render('users/signup'));
-app.get('/login', (req, res) => res.render('users/login'));
-app.get('/cart', (req, res) => res.render('cart'));
-app.get('/forgot-password', (req, res) => res.render('users/forgot-password'));
+app.get('/signup', (req, res) => res.render('users/signup', { title: 'Signup' }));
+app.get('/login', (req, res) => res.render('users/login', { title: 'Login' }));
+app.get('/cart', (req, res) => res.render('cart', { title: 'Cart' }));
+app.get('/forgot-password', (req, res) => res.render('users/forgot-password', { title: 'Forgot Password' }));
 app.get('/reset-password', (req, res) => {
   const { email } = req.query;
-  res.render('users/reset-password', { email });
+  res.render('users/reset-password', { email, title: 'Reset Password' });
 });
 
 // ✅ Categories page
@@ -105,11 +108,12 @@ app.get('/categories', async (req, res) => {
     const categories = await category.find();
     res.render('categories', {
       categories,
-      user: req.user || null
+      user: req.user || null,
+      title: 'Categories'
     });
   } catch (err) {
     console.error("❌ Failed to load categories:", err);
-    res.render('categories', { categories: [], user: null });
+    res.render('categories', { categories: [], user: null, title: 'Categories' });
   }
 });
 
