@@ -33,6 +33,15 @@
   <% } else { %>
     <p class="text-gray-500 italic">No orders found.</p>
   <% } %>
+
+  <% if (user.isAdmin) { %>
+  <div class="mb-4">
+    <a href="/admin/add-product" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+      ➕ Add New Product
+    </a>
+  </div>
+  <% } %>
+
 </div>
 
 </main>
