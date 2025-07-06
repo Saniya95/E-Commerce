@@ -1,9 +1,8 @@
 // controllers/cartController.js
 const userModel = require('../models/usermodel');
-const product =  require('../models/product'); // ✅ registers the Product model if not already
+const product = require('../models/product');
 
-// controllers/cartController.js
-
+// ✅ Add to cart
 exports.addToCart = async (req, res) => {
   const { productId, quantity } = req.body;
   const user = await userModel.findById(req.user.id);
@@ -17,12 +16,10 @@ exports.addToCart = async (req, res) => {
   }
 
   await user.save();
-
-  // ✅ IMPORTANT: Respond with JSON (so Toastify can show message)
   res.status(200).json({ success: true, message: "Item added to cart" });
 };
 
-// ✅ Updated getCart for EJS rendering
+// ✅ Get cart page with populated products
 exports.getCart = async (req, res) => {
   try {
     const user = await userModel.findById(req.user.id).populate('cart.product');
@@ -30,10 +27,17 @@ exports.getCart = async (req, res) => {
       return res.status(404).render('error', { message: 'User not found' });
     }
 
-    const cartItems = user.cart;
+    const products = user.cart.map(item => ({
+      _id: item.product._id,
+      name: item.product.name,
+      price: item.product.price,
+      image: item.product.image, // or imageUrl/imageFile
+      quantity: item.quantity
+    }));
+
     res.render('cart', {
-      title: "Your Cart",          // ✅ TITLE IS PASSED HERE
-      cartItems                    // ✅ YOUR CART DATA
+      title: "Your Cart",
+      products
     });
   } catch (err) {
     console.error("Cart Error:", err);
@@ -41,23 +45,22 @@ exports.getCart = async (req, res) => {
   }
 };
 
-
+// ✅ Remove from cart
 exports.removeFromCart = async (req, res) => {
-  const { productId } = req.params; // ✅ use req.params instead of req.body
+  const { productId } = req.params;
   const user = await userModel.findById(req.user.id);
   if (!user) return res.status(404).json({ success: false, message: "User not found" });
 
   user.cart = user.cart.filter(item => item.product.toString() !== productId);
   await user.save();
 
-  // 🔁 Redirect or send success response
-  res.redirect('/cart'); // ✅ or send JSON if it's an API
+  res.redirect('/cart');
 };
 
-
+// ✅ Update cart quantity
 exports.updateCartQuantity = async (req, res) => {
   const { quantity } = req.body;
-  const { productId } = req.params; // ✅ get from route param
+  const { productId } = req.params;
 
   const user = await userModel.findById(req.user.id);
   if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -68,5 +71,9 @@ exports.updateCartQuantity = async (req, res) => {
   item.quantity = Number(quantity);
   await user.save();
 
-  res.redirect('/cart'); // or res.status(200).json({ success: true });
+ res.render('cart', {
+  title: "Your Cart",
+  cartItems
+    });
+
 };

@@ -1,15 +1,24 @@
 const Product = require("../models/product");
 const Category = require('../models/category');
 
-// 👇 Get Add Product Page
-const getAddProductPage = (req, res) => {
-  res.render("admin/add-product", { title: "Add Product" });
+// 👇 Get Add Product Page with categories
+const getAddProductPage = async (req, res) => {
+  try {
+    const categories = await Category.find(); // Fetch all categories from DB
+    res.render("admin/add-product", {
+      title: "Add Product",
+      categories, // Pass categories to EJS
+    });
+  } catch (err) {
+    console.error("❌ Error fetching categories:", err);
+    res.status(500).render("error", { message: "Error loading add product page" });
+  }
 };
 
 // 👇 Create Product Handler (used in POST form)
 const createProduct = async (req, res) => {
   try {
-    const { name, price, description, category, imageUrl } = req.body;
+    const { name, price, description, categorySlug, imageUrl } = req.body;
     let imagePath = null;
 
     if (req.file) {
@@ -18,7 +27,7 @@ const createProduct = async (req, res) => {
       imagePath = imageUrl;
     }
 
-    const categoryDoc = await Category.findOne({ slug: category.toLowerCase() });
+    const categoryDoc = await Category.findOne({ slug: categorySlug.toLowerCase() });
     if (!categoryDoc) {
       return res.render("error", { message: "❌ Category not found" });
     }
@@ -33,7 +42,7 @@ const createProduct = async (req, res) => {
     });
 
     await newProduct.save();
-    res.redirect('/'); // or res.redirect('/admin/products')
+    res.redirect('/');
   } catch (err) {
     console.error("❌ Product Create Error:", err);
     res.status(500).render("error", { message: "Product creation failed" });
@@ -41,6 +50,6 @@ const createProduct = async (req, res) => {
 };
 
 module.exports = {
-  createProduct,
-  getAddProductPage
+  getAddProductPage,
+  createProduct
 };
