@@ -1,20 +1,26 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/usermodel'); // make sure path is correct
 
-module.exports = function verifyUser(req, res, next) {
+module.exports = async function verifyUser(req, res, next) {
   const token = req.cookies?.token;
 
   if (!token) {
-    // ✨ Flash + redirect to homepage
-    req.flash('error', '🔒 Login required to view cart.');
-    return res.redirect('/');
+    req.flash('error', '🔒 Login required to view this page.');
+    return res.redirect('/login');
   }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // attach user object
+    const user = await User.findById(decoded.id); // ✅ fetch full user
+    if (!user) {
+      req.flash('error', 'User not found');
+      return res.redirect('/login');
+    }
+    req.user = user; // ✅ assign full user doc
     next();
   } catch (err) {
+    console.error("JWT error:", err);
     req.flash('error', '⚠️ Session expired. Please log in again.');
-    return res.redirect('/');
+    return res.redirect('/login');
   }
 };

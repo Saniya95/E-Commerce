@@ -1,7 +1,7 @@
-const mongoose = require ('mongoose');
+const mongoose = require('mongoose');
 
 const userSchema = mongoose.Schema({
-    fullname: String,
+  fullname: String,
   email: {
     type: String,
     unique: true,
@@ -9,26 +9,32 @@ const userSchema = mongoose.Schema({
   },
   contact: String,
   password: String,
+
   isVerified: {
     type: Boolean,
     default: false
   },
+
+  isAdmin: {
+    type: Boolean,
+    default: false     // ✅ Important!
+  },
+
   otp: {
     code: String,
     expiresAt: Date
   },
+
   otpExpiry: Date,
 
-cart: [
-  {
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'product' },
-    quantity: { type: Number, default: 1 }
-  }
-],
+  cart: [
+    {
+      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+      quantity: { type: Number, default: 1 }
+    }
+  ],
 
   profilepic: { type: String }
-
 });
 
-
- module.exports = mongoose.model("user", userSchema);
+module.exports = mongoose.model("user", userSchema);

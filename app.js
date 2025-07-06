@@ -7,7 +7,8 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const flash = require('connect-flash');
 const expressLayouts = require("express-ejs-layouts");
-
+const userModel = require('./models/usermodel'); 
+const bcrypt = require('bcryptjs');
 
 // Connect DB
 const connectDB = require("./config/mongoose");
@@ -82,16 +83,19 @@ app.use('/', paymentRouter);
 app.use("/admin", adminRouter);
 app.use('/', staticRouter);
 
-// ✅ Pages
-app.get('/', async (req, res) => {
+// ✅ Home Page
+app.get("/", async (req, res) => {
   try {
     const products = await Product.find();
-    res.render('index', { products, title: 'Home' });
+    res.render("index", { products });
   } catch (err) {
-    console.error("❌ Failed to load products:", err);
-    res.render('index', { products: [], title: 'Home' });
+    console.error("Error loading homepage:", err);
+    res.render("error", { message: "Homepage failed" });
   }
 });
+
+
+
 
 app.get('/signup', (req, res) => res.render('users/signup', { title: 'Signup' }));
 app.get('/login', (req, res) => res.render('users/login', { title: 'Login' }));
@@ -117,8 +121,26 @@ app.get('/categories', async (req, res) => {
   }
 });
 
-app.get('/testplain', (req, res) => {
-  res.send('Plain text test');
+app.get('/create-test-user', async (req, res) => {
+  try {
+    const existing = await userModel.findOne({ email: "test@example.com" });
+    if (existing) return res.send("✅ Test user already exists");
+
+    const hashed = await bcrypt.hash("password123", 10);
+    const user = await userModel.create({
+      fullname: "Test User",
+      email: "test@example.com",
+      contact: "9999999999",
+      password: hashed,
+      location: "DemoCity",
+      isVerified: true
+    });
+
+    res.send("✅ Test user created: " + user.email);
+  } catch (err) {
+    console.error("❌ Error creating user:", err.message);
+    res.status(500).send("Error creating test user.");
+  }
 });
 
 // ✅ Start Server

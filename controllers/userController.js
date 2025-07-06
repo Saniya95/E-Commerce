@@ -47,21 +47,19 @@ exports.signup = async (req, res) => {
 
 // 🔐 LOGIN
 exports.login = async (req, res) => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    return res.render("users/login", { error: "Validation failed" });
-  }
-
   try {
     const { email, password } = req.body;
-    const user = await userModel.findOne({ email });
+    console.log("Login attempt:", email, password); // ✅ Step 1: Log input
 
+    const user = await userModel.findOne({ email });
     if (!user) {
+      console.log("User not found");
       return res.render("users/login", { error: "Invalid credentials" });
     }
 
     const matched = await bcrypt.compare(password, user.password);
     if (!matched) {
+      console.log("Password mismatch");
       return res.render("users/login", { error: "Incorrect password" });
     }
 
@@ -72,14 +70,13 @@ exports.login = async (req, res) => {
     );
     res.cookie("token", token, { httpOnly: true });
 
+    console.log("Login successful, redirecting to /");
     req.flash("success", "Login successful");
-    return res.redirect("/"); // ✅ Redirect instead of rendering directly
+    return res.redirect("/");
 
   } catch (err) {
-    console.error(err);
-    return res.render("users/login", {
-      error: "Login failed: " + err.message
-    });
+    console.error("❌ Login Error: ", err);
+    return res.render("users/login", { error: "Login failed" });
   }
 };
 
@@ -144,14 +141,31 @@ exports.resetPassword = async (req, res) => {
 exports.profilePage = async (req, res) => {
   try {
     const user = await userModel.findById(req.user.id);
-    const orders = await orderModel.find({ userId: user._id });
 
-    res.render("users/profile", { user, orders });
+    if (!user) {
+      req.flash("error", "User not found");
+      return res.redirect("/login");
+    }
+
+    // 👇 log for debug (optional)
+    console.log("Is Admin:", user.isAdmin);
+
+    res.render("users/profile", {
+      user: user, // ✅ pass full user object
+      orders: user.orders || [],
+      success: req.flash("success"),
+      error: req.flash("error")
+    });
   } catch (err) {
     console.error("❌ Error loading profile:", err);
-    res.status(500).send("Failed to load profile.");
+    req.flash("error", "Profile load failed");
+    return res.redirect("/");
   }
 };
+
+
+
+
 
 
 // 🔓 LOGOUT

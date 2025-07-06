@@ -1,48 +1,53 @@
-<%- include('../partials/header', { title: "Profile" }) %>
-<main>
-  <div class="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
-  <h2 class="text-2xl font-bold mb-4">👤 Your Profile</h2>
+<main class="bg-[#fdfaf6] min-h-screen py-10 px-4">
+  <!-- 👤 Profile Section -->
+  <section class="max-w-xl mx-auto p-6 bg-white rounded shadow">
+    <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+      <span>👤</span> Your Profile
+    </h2>
 
-  <div class="mb-4">
-    <img src="<%= user.profilepic ? '/uploads/' + user.profilepic : '/images/default-user.png' %>" 
-     alt="Profile Picture"
-     class="w-32 h-32 rounded-full object-cover">
-  </div>
+    <div class="flex flex-col items-center text-center mb-6">
+      <img src="<%= user.profilepic ? '/uploads/' + user.profilepic : '/images/default-user.png' %>" 
+           alt="Profile Picture"
+           class="w-32 h-32 rounded-full object-cover shadow-md mb-4">
+      <p><strong>Name:</strong> <%= user.fullname %></p>
+      <p><strong>Email:</strong> <%= user.email %></p>
+      <p><strong>Contact:</strong> <%= user.contact %></p>
 
-  <p class="mb-2"><strong>Name:</strong> <%= user.fullname %></p>
-  <p class="mb-2"><strong>Email:</strong> <%= user.email %></p>
-  <p class="mb-2"><strong>Contact:</strong> <%= user.contact %></p>
+      <a href="/users/edit-profile"
+         class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+         ✏️ Edit Profile
+      </a>
+    </div>
 
-  <a href="/users/edit-profile" class="inline-block mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Edit Profile</a>
-</div>
+    <!-- 🔐 Admin Section -->
+    <% if (user.isAdmin) { %>
+      <div class="text-center">
+        <a href="/admin/products/add"
+           class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+           ➕ Add New Product
+        </a>
+      </div>
+    <% } %>
+  </section>
 
-<!-- 🛒 Orders Section -->
-<div class="max-w-xl mx-auto mt-8 p-6 bg-white rounded shadow">
-  <h3 class="text-xl font-semibold mb-4">🛒 Your Orders</h3>
+  <!-- 🛒 Orders Section -->
+  <section class="max-w-xl mx-auto mt-10 p-6 bg-white rounded shadow">
+    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+      <span>🛒</span> Your Orders
+    </h3>
 
-  <% if (orders.length > 0) { %>
-    <ul class="space-y-4">
-      <% orders.forEach(order => { %>
-        <li class="border p-4 rounded bg-gray-100">
-          <p><strong>Order ID:</strong> <%= order._id %></p>
-          <p><strong>Total:</strong> ₹<%= order.total %></p>
-          <p><strong>Status:</strong> <%= order.status || 'Pending' %></p>
-        </li>
-      <% }); %>
-    </ul>
-  <% } else { %>
-    <p class="text-gray-500 italic">No orders found.</p>
-  <% } %>
-
-  <% if (user.isAdmin) { %>
-  <div class="mb-4">
-    <a href="/admin/add-product" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-      ➕ Add New Product
-    </a>
-  </div>
-  <% } %>
-
-</div>
-
+    <% if (orders.length > 0) { %>
+      <ul class="space-y-4">
+        <% orders.forEach(order => { %>
+          <li class="border p-4 rounded bg-gray-100">
+            <p><strong>Order ID:</strong> <%= order._id %></p>
+            <p><strong>Total:</strong> ₹<%= order.total %></p>
+            <p><strong>Status:</strong> <%= order.status || 'Pending' %></p>
+          </li>
+        <% }) %>
+      </ul>
+    <% } else { %>
+      <p class="text-gray-500 italic">No orders found.</p>
+    <% } %>
+  </section>
 </main>
-<%- include('../partials/footer') %>

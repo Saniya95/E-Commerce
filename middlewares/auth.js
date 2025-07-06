@@ -29,6 +29,10 @@ exports.verifyUser = async (req, res, next) => {
 
 // middlewares/auth.js
 exports.verifyAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') return next();
-  return res.status(403).render("error", { message: "Admin access only." });
+  if (!req.user || !req.user.isAdmin) {
+    req.flash('error', '⛔ Admin access only');
+    return res.redirect('/');
+  }
+  next();
 };
+
