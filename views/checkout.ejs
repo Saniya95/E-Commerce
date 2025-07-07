@@ -22,3 +22,45 @@
   <button class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Confirm Payment</button>
 </div>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<form id="paymentForm">
+  <input type="hidden" id="totalAmount" value="<%= total %>" />
+  <button
+    id="rzp-button"
+    class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+    type="button"
+  >
+    Confirm Payment
+  </button>
+</form>
+
+<script>
+  const total = document.getElementById("totalAmount").value;
+
+  document.getElementById("rzp-button").onclick = async function () {
+    const res = await fetch("/create-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ total }),
+    });
+
+    const data = await res.json();
+    const options = {
+      key: "<%= process.env.RAZORPAY_KEY_ID %>", // You may embed this via EJS if you're passing it
+      amount: data.order.amount,
+      currency: "INR",
+      name: "RentX Store",
+      description: "Order Payment",
+      order_id: data.order.id,
+      handler: function (response) {
+        alert("Payment successful!");
+        // Here you can redirect or show success UI
+      },
+      theme: { color: "#3399cc" },
+    };
+
+    const rzp1 = new Razorpay(options);
+    rzp1.open();
+  };
+</script>
