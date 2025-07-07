@@ -72,6 +72,7 @@ const paymentRouter = require('./routes/paymentRouter');
 const categoryRouter = require('./routes/categoryRouter');
 const adminRouter = require("./routes/adminRouter");
 const staticRouter = require('./routes/staticRouter')
+const checkoutRouter = require('./routes/checkoutRouter');
 
 
 app.use('/categories', categoryRouter);
@@ -82,6 +83,8 @@ app.use(cartRouter);
 app.use('/', paymentRouter);
 app.use("/admin", adminRouter);
 app.use('/', staticRouter);
+app.use('/', checkoutRouter);
+
 
 // ✅ Home Page
 app.get("/", async (req, res) => {

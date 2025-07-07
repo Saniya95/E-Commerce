@@ -10,18 +10,43 @@
       <p class="text-gray-500">Looks like you haven’t added anything to your cart yet.</p>
     </div>
   <% } else { %>
+    <% let total = 0; %>
+
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       <% items.forEach(item => { %>
+        <% total += item.product.price * item.quantity; %>
         <div class="border rounded-lg shadow hover:shadow-lg overflow-hidden">
-          <img src="<%= item.product.image %>" class="w-full h-48 object-cover" alt="<%= item.product.name %>">
+          <img src="<%= item.product.imageUrl || ('/uploads/' + item.product.imageFile) || 'https://via.placeholder.com/300' %>" class="w-full h-48 object-cover" alt="<%= item.product.name %>">
           <div class="p-4">
             <h3 class="text-lg font-semibold"><%= item.product.name %></h3>
             <p class="text-sm text-gray-600"><%= item.product.description %></p>
             <p class="text-blue-700 font-bold mt-2">₹<%= item.product.price %></p>
             <p class="text-sm text-gray-500 mt-1">Qty: <%= item.quantity %></p>
+
+            <!-- Quantity Update -->
+            <form action="/cart/update/<%= item.product._id %>" method="POST" class="mt-2 flex gap-2">
+              <input type="number" name="quantity" value="<%= item.quantity %>" min="1" class="border px-2 py-1 rounded w-16 text-sm" />
+              <button class="px-2 py-1 bg-green-600 text-white text-sm rounded">Update</button>
+            </form>
+
+            <!-- Remove Item -->
+            <form action="/cart/remove/<%= item.product._id %>" method="POST" class="mt-2">
+              <button class="text-red-500 text-sm">Remove</button>
+            </form>
           </div>
         </div>
       <% }) %>
+    </div>
+
+    <!-- Cart Total + Checkout Button -->
+    <div class="mt-8 text-right">
+      <p class="text-lg font-semibold">Subtotal: ₹<%= total %></p>
+      <p class="text-sm text-gray-500">Delivery: ₹50</p>
+      <p class="text-xl font-bold mt-1">Total: ₹<%= total + 50 %></p>
+
+      <form action="/checkout" method="GET" class="inline-block mt-4">
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded">Proceed to Checkout</button>
+      </form>
     </div>
   <% } %>
 </main>

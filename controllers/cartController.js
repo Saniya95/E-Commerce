@@ -1,4 +1,3 @@
-// controllers/cartController.js
 const userModel = require('../models/usermodel');
 const product = require('../models/product');
 
@@ -27,17 +26,9 @@ exports.getCart = async (req, res) => {
       return res.status(404).render('error', { message: 'User not found' });
     }
 
-    const products = user.cart.map(item => ({
-      _id: item.product._id,
-      name: item.product.name,
-      price: item.product.price,
-      image: item.product.image, // or imageUrl/imageFile
-      quantity: item.quantity
-    }));
-
     res.render('cart', {
       title: "Your Cart",
-      products
+      cartItems: user.cart // ✅ This matches cart.ejs usage
     });
   } catch (err) {
     console.error("Cart Error:", err);
@@ -71,9 +62,5 @@ exports.updateCartQuantity = async (req, res) => {
   item.quantity = Number(quantity);
   await user.save();
 
- res.render('cart', {
-  title: "Your Cart",
-  cartItems
-    });
-
+  res.redirect('/cart');
 };
