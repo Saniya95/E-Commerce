@@ -1,4 +1,3 @@
-// 📁 routes/cartRouter.js
 const express = require('express');
 const router = express.Router();
 
@@ -15,7 +14,12 @@ const {
   updateCartQuantity
 } = require('../controllers/cartController');
 
-// POST /cart - Add to cart with validator and error check
+const {
+  checkoutPage,
+  createOrder
+} = require('../controllers/checkoutController');
+
+// ✅ 1. Add to Cart with validation
 router.post('/cart', verifyUser, addToCartValidator, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -25,16 +29,22 @@ router.post('/cart', verifyUser, addToCartValidator, async (req, res) => {
       errors: errors.array().map(e => e.msg)
     });
   }
-  await addToCart(req, res); // ✅ Correctly calls controller
+  await addToCart(req, res);
 });
 
-// GET /cart - View cart
+// ✅ 2. Get Cart
 router.get('/cart', verifyUser, getCart);
 
-// POST /cart/remove - Remove from cart
+// ✅ 3. Remove item from cart
 router.post('/cart/remove/:productId', verifyUser, removeFromCart);
 
-// ✅ This allows updating a specific product:
+// ✅ 4. Update cart item quantity
 router.post('/cart/update/:productId', verifyUser, updateCartQuantity);
+
+// ✅ 5. Proceed to Checkout Page
+router.get('/checkout', verifyUser, checkoutPage);
+
+// ✅ 6. Create Razorpay order
+router.post('/create-order', verifyUser, createOrder);
 
 module.exports = router;

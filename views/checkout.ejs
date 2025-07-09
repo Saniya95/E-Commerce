@@ -35,6 +35,19 @@
   </button>
 </form>
 
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+<form id="paymentForm">
+  <input type="hidden" id="totalAmount" value="<%= total %>" />
+  <button
+    id="rzp-button"
+    class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+    type="button"
+  >
+    Confirm Payment
+  </button>
+</form>
+
 <script>
   const total = document.getElementById("totalAmount").value;
 
@@ -47,15 +60,15 @@
 
     const data = await res.json();
     const options = {
-      key: "<%= process.env.RAZORPAY_KEY_ID %>", // You may embed this via EJS if you're passing it
+      key: "<%= razorpayKey %>", // ✅ comes from controller
       amount: data.order.amount,
       currency: "INR",
-      name: "RentX Store",
+      name: "scratch Store",
       description: "Order Payment",
       order_id: data.order.id,
       handler: function (response) {
         alert("Payment successful!");
-        // Here you can redirect or show success UI
+        // ✅ Optional: redirect to success page
       },
       theme: { color: "#3399cc" },
     };
