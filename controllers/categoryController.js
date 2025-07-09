@@ -16,7 +16,7 @@ exports.categoryPage = async (req, res) => {
     const products = await Product.find({ category: categoryDoc._id });
 
     // 3. Render category page
-    res.render("products/category-products", {
+    res.render("products-by-category", {
       layout: "layout",
       title: `${categoryDoc.name}`,
       products: products || [],

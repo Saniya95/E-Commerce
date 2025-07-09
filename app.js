@@ -10,6 +10,7 @@ const expressLayouts = require("express-ejs-layouts");
 const userModel = require('./models/usermodel'); 
 const bcrypt = require('bcryptjs');
 
+
 // Connect DB
 const connectDB = require("./config/mongoose");
 connectDB();

@@ -15,34 +15,37 @@ const getAddProductPage = async (req, res) => {
   }
 };
 
-// 👇 Create Product Handler (used in POST form)
+// 👇 Create Product Handler (POST)
 const createProduct = async (req, res) => {
   try {
     const { name, price, description, categorySlug, imageUrl } = req.body;
-    let imagePath = null;
+    let imagePath;
 
+    // ✅ Use uploaded file or imageUrl
     if (req.file) {
       imagePath = `/uploads/${req.file.filename}`;
     } else if (imageUrl) {
       imagePath = imageUrl;
     }
 
+    // ✅ Fetch category based on slug
     const categoryDoc = await Category.findOne({ slug: categorySlug.toLowerCase() });
     if (!categoryDoc) {
       return res.render("error", { message: "❌ Category not found" });
     }
 
+    // ✅ Create product with category ID
     const newProduct = new Product({
       name,
       price,
-      image: imagePath,
+      imageUrl: imagePath,
       description,
-      category: categoryDoc._id,
-      createdBy: req.user._id,
+      category: categoryDoc._id
     });
 
     await newProduct.save();
-    res.redirect('/');
+    res.redirect('/'); // redirect to homepage or /products
+
   } catch (err) {
     console.error("❌ Product Create Error:", err);
     res.status(500).render("error", { message: "Product creation failed" });

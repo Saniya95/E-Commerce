@@ -50,3 +50,36 @@
     </div>
   <% } %>
 </main>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  document.getElementById("rzp-button").onclick = function (e) {
+    e.preventDefault();
+
+    fetch("/create-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+    .then(res => res.json())
+    .then(order => {
+      const options = {
+        key: "<%= razorpayKeyId %>", // ✅ passed from controller
+        amount: order.amount,
+        currency: "INR",
+        name: "RentX",
+        description: "Cart Payment",
+        order_id: order.id,
+        handler: function (response) {
+          window.location.href = `/payment-success?payment_id=${response.razorpay_payment_id}`;
+        },
+        theme: {
+          color: "#1D4ED8"
+        }
+      };
+      const rzp = new Razorpay(options);
+      rzp.open();
+    });
+  };
+  </script>
