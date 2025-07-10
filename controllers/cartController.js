@@ -21,20 +21,31 @@ exports.addToCart = async (req, res) => {
 // ✅ Get cart page with populated products
 exports.getCart = async (req, res) => {
   try {
-    const user = await userModel.findById(req.user.id).populate('cart.product');
-    if (!user) {
-      return res.status(404).render('error', { message: 'User not found' });
-    }
+    const user = await userModel.findById(req.user.id).populate("cart.product");
 
-    res.render('cart', {
-      title: "Your Cart",
-      cartItems: user.cart // ✅ This matches cart.ejs usage
+    // calculate total
+    const cartItems = user.cart || [];
+    const subtotal = cartItems.reduce((total, item) => {
+      return total + item.product.price * item.quantity;
+    }, 0);
+    const delivery = 50;
+    const total = subtotal + delivery;
+
+    res.render("cart", {
+      cartItems,
+      subtotal,
+      delivery,
+      total,
+      razorpayKeyId: process.env.rzp_test_b5DTwApoKioOxQ, // ✅ Pass it here
+      success: req.flash("success"),
+      error: req.flash("error")
     });
   } catch (err) {
-    console.error("Cart Error:", err);
-    res.status(500).render('error', { message: 'Something went wrong while loading the cart.' });
+    console.error("❌ Error loading cart:", err);
+    res.status(500).render("error", { message: "Failed to load cart" });
   }
 };
+
 
 // ✅ Remove from cart
 exports.removeFromCart = async (req, res) => {

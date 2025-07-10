@@ -34,7 +34,21 @@ const userSchema = mongoose.Schema({
     }
   ],
 
-  profilepic: { type: String }
+  profilepic: { type: String },
+
+   address: [
+  {
+    fullName: String,
+    mobile: String,
+    street: String,
+    city: String,
+    state: String,
+    zip: String,
+    country: String,
+    isDefault: { type: Boolean, default: false }
+  }
+],
+
 });
 
 module.exports = mongoose.model("user", userSchema);
