@@ -14,10 +14,8 @@ const {
   updateCartQuantity
 } = require('../controllers/cartController');
 
-const {
-  checkoutPage,
-  createOrder
-} = require('../controllers/checkoutController');
+const { checkoutPage } = require('../controllers/checkoutController');
+const { createOrder } = require('../controllers/paymentController');
 
 // ✅ 1. Add to Cart with validation
 router.post('/cart', verifyUser, addToCartValidator, async (req, res) => {

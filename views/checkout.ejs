@@ -115,9 +115,18 @@
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ total, addressIndex }),
     });
-
-    const data = await res.json();
-
+    let data;
+    try {
+      data = await res.json();
+      console.log("Order API response:", data);
+    } catch (e) {
+      alert("Order API did not return JSON. Check if you are logged in or if there is a server error.");
+      return;
+    }
+    if (!data.success) {
+      alert("Order creation failed: " + (data.error || "Unknown error"));
+      return;
+    }
     const options = {
       key: "<%= razorpayKey %>",
       amount: data.order.amount,
@@ -131,7 +140,6 @@
       },
       theme: { color: "#3399cc" },
     };
-
     const rzp1 = new Razorpay(options);
     rzp1.open();
   };

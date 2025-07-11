@@ -15,7 +15,7 @@ exports.checkoutPage = async (req, res) => {
   const delivery = 50;
   const total = subtotal + delivery;
 
-  res.render("checkout", { cart, subtotal, delivery, total });
+  res.render("checkout", { cart, subtotal, delivery, total, razorpayKey: process.env.RAZORPAY_KEY_ID });
 };
 
 exports.createOrder = async (req, res) => {

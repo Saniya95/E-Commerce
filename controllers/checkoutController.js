@@ -15,18 +15,14 @@ exports.checkoutPage = async (req, res) => {
     res.render("checkout", { cart, subtotal, 
       delivery,
       total, 
-      razorpayKey: process.env.rzp_test_b5DTwApoKioOxQ, addresses: user.address || [],
+      razorpayKey: process.env.RAZORPAY_KEY_ID,
+      addresses: user.address || [],
     });
 
      } catch (err) {
     console.error("❌ Checkout Error:", err);
     res.status(500).render("error", { message: "Failed to load checkout page" });
   }
-};
-
-exports.createOrder = (req, res) => {
-  // TODO: Implement order creation logic
-  res.json({ success: true, message: "Order created (placeholder)" });
 };
 
 exports.saveAddress = async (req, res) => {
